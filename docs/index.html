@@ -37,6 +37,12 @@ input:focus{border-color:var(--lilac2)}
 .tbtn span{font-size:15px;line-height:1;filter:grayscale(.7) opacity(.7)}
 .tbtn.on{border-color:var(--lilac2);background:var(--lilacbg);color:var(--lilac)}
 .tbtn.on span{filter:none}
+.st{font-size:11px;margin-left:8px;padding:0 5px;border-radius:2px;border:1px solid var(--line);color:var(--dim)}
+.pp .st{margin-left:0}
+.st-open{color:var(--lilac);border-color:var(--lilac2)}
+.st-waitlist{color:#d6d6db;border-color:#55505f}
+.st-closed{color:#8a8396;border-style:dashed}
+.item.closed .nm{color:#9a94a6}
 .chip.on{color:var(--lilac);border-color:var(--lilac2);background:var(--lilacbg)}
 .chip b{font-weight:400;opacity:.6;margin-left:3px}
 #list{overflow-y:auto;flex:1;min-height:0;overscroll-behavior:contain}
@@ -172,7 +178,7 @@ if (canWorkerTiles){
 }
 
 const people = new Map(), markers = new Map();
-const active = new Set(), pactive = new Set(); let transOnly = false, mode = "or", q = "", sel = null, first = true;
+const active = new Set(), pactive = new Set(); let hideClosed = false, transOnly = false, mode = "or", q = "", sel = null, first = true;
 let details = null, detailsP = null;
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const safeUrl = u => /^https?:\/\//i.test(u||"") ? u : "";
@@ -188,13 +194,13 @@ function loadDetails(){
 // pixel ratio, then stamped with drawImage — no per-pin path/gradient work on redraw.
 const GLOW = 2.8, sprites = new Map();
 function sprite(o, r){
-  const dpr = window.devicePixelRatio || 1, key = `${o.color}|${o.fillOpacity}|${o.weight}|${o.dashArray}|${r}|${dpr}`;
+  const dpr = window.devicePixelRatio || 1, ga = o.glowAlpha ?? .5, key = `${o.color}|${o.fillColor}|${o.fillOpacity}|${o.weight}|${o.dashArray}|${ga}|${r}|${dpr}`;
   let sp = sprites.get(key); if (sp) return sp;
   const R = r * GLOW, size = Math.ceil(R * 2 + o.weight + 2), c = document.createElement("canvas");
   c.width = c.height = Math.ceil(size * dpr);
   const x = c.getContext("2d"), m = size / 2; x.scale(dpr, dpr);
   const g = x.createRadialGradient(m, m, r * .6, m, m, R);
-  g.addColorStop(0, "rgba(167,139,250,.5)"); g.addColorStop(1, "rgba(167,139,250,0)");
+  g.addColorStop(0, `rgba(167,139,250,${ga})`); g.addColorStop(1, "rgba(167,139,250,0)");
   x.fillStyle = g; x.beginPath(); x.arc(m, m, R, 0, Math.PI * 2); x.fill();
   x.beginPath(); x.arc(m, m, r, 0, Math.PI * 2);
   if (o.fillOpacity){ x.globalAlpha = o.fillOpacity; x.fillStyle = o.fillColor; x.fill(); x.globalAlpha = 1; }
@@ -218,13 +224,15 @@ const GlowDot = L.CircleMarker.extend({
 });
 const canvas = new GlowCanvas({padding:.3});
 const LILAC = "#a78bfa";
-const dotStyle = p => ({renderer:canvas, radius:5, weight:p.precision==="approx"?1.5:2, color:p.precision==="approx"?LILAC:"#0b0b0d",
-  fillColor:LILAC, fillOpacity:p.precision==="approx"?0:1, dashArray:p.precision==="approx"?"2 2":null});
+const CLOSED = "#5f5878";
+const dotStyle = p => { const c = p.availability === "closed", col = c ? CLOSED : LILAC;
+  return {renderer:canvas, radius:5, weight:p.precision==="approx"?1.5:2, color:p.precision==="approx"?col:"#0b0b0d",
+    fillColor:col, fillOpacity:p.precision==="approx"?0:1, dashArray:p.precision==="approx"?"2 2":null, glowAlpha:c ? .12 : .5}; };
 function makeMarker(p, fresh){
   let m;
   if (p.trans_nb){
     const icon = L.divIcon({className:"", html:`<div class="tpin${fresh?" drop":""}">🏳️‍⚧️</div>`, iconSize:[20,20], iconAnchor:[10,10]});
-    m = L.marker([p.lat,p.lng], {icon, zIndexOffset:500});
+    m = L.marker([p.lat,p.lng], {icon, zIndexOffset:500, opacity:p.availability==="closed"?.45:1});
   } else {
     m = new GlowDot([p.lat,p.lng], dotStyle(p));
     if (fresh){ let r = 14; m.setRadius(r);
@@ -243,6 +251,7 @@ function popup(id){
   return `<div class="pp"><h3>${p.trans_nb?"🏳️‍⚧️ ":""}${esc(p.name)}</h3>
     ${p.pronouns?`<div class="row" style="color:var(--lilac)">${esc(p.pronouns)}</div>`:""}
     ${p.title||p.role||p.practice?`<div class="row" style="color:var(--dim)">${esc([p.title||p.role,p.practice].filter(Boolean).join(" @ "))}</div>`:""}
+    <div class="row"><span class="k">status</span><span class="st st-${esc(p.availability||"unknown")}">${esc({open:"taking new patients",closed:"not taking new patients",waitlist:"waitlist",unknown:"unknown — call to check"}[p.availability||"unknown"])}</span></div>
     ${p.informed_consent||p.bulk_billing||p.min_age?`<div class="row"><span class="k">model</span>${esc([p.informed_consent&&"informed consent",p.bulk_billing&&"bulk bills",p.min_age&&("ages "+p.min_age)].filter(Boolean).join(" · "))}</div>`:""}
     ${loc?`<div class="row"><span class="k">where</span>${esc(loc)}${p.telehealth&&!p.telehealth_only?" (+telehealth)":""}</div>`:""}
     ${p.phone?`<div class="row"><span class="k">phone</span><a href="tel:${esc(p.phone.replace(/\s/g,""))}">${esc(p.phone)}</a></div>`:""}
@@ -256,6 +265,7 @@ function popup(id){
 const isTrans = p => p.trans_nb;
 function matches(p){
   if (transOnly && !isTrans(p)) return false;
+  if (hideClosed && p.availability === "closed") return false;
   if (pactive.size && !(p.pron_tags||[]).some(t=>pactive.has(t))) return false;
   if (active.size){
     const has = k => p.keywords.includes(k) || (k==="trans" && p.trans_nb);
@@ -269,7 +279,7 @@ function matches(p){
 function renderChips(){
   const counts = Object.fromEntries(KW.map(k=>[k,0]));
   people.forEach(p=>p.keywords.forEach(k=>counts[k]!=null&&counts[k]++));
-  document.getElementById("chips").innerHTML = `<span class="mode" id="mode" title="${mode==="and"?"match ALL selected (and) — click for any":"match ANY selected (or) — click for all"}">${mode==="and"?"∧":"∨"}</span>` + `<span class="tbtn${transOnly?" on":""}" id="tbtn" title="only prescribers who publicly identify as trans / non-binary"><span>🏳️‍⚧️</span>${[...people.values()].filter(isTrans).length}</span>` + KW.map(k=>`<span class="chip${active.has(k)?" on":""}" data-k="${k}">${k}<b>${counts[k]}</b></span>`).join("");
+  document.getElementById("chips").innerHTML = `<span class="mode" id="mode" title="${mode==="and"?"match ALL selected (and) — click for any":"match ANY selected (or) — click for all"}">${mode==="and"?"∧":"∨"}</span>` + `<span class="tbtn${transOnly?" on":""}" id="tbtn" title="only prescribers who publicly identify as trans / non-binary"><span>🏳️‍⚧️</span>${[...people.values()].filter(isTrans).length}</span>` + `<span class="tbtn${hideClosed?" on":""}" id="hcbtn" title="hide services not taking new patients">hide closed <b style="font-weight:400;opacity:.6">${[...people.values()].filter(p=>p.availability==="closed").length}</b></span>` + KW.map(k=>`<span class="chip${active.has(k)?" on":""}" data-k="${k}">${k}<b>${counts[k]}</b></span>`).join("");
 }
 function renderPChips(){
   const counts = Object.fromEntries(PRON.map(k=>[k,0]));
@@ -280,8 +290,8 @@ function renderPChips(){
 // list: render in batches of PAGE as the user scrolls
 const listEl = document.getElementById("list");
 let shown = [], rendered = 0, lastListKey = "", newSet = new Set();
-const rowHtml = p => `<div class="item${sel===p.id?" sel":""}${newSet.has(p.id)?" new":""}" data-id="${esc(p.id)}">
-    <div><span class="nm">${p.trans_nb?"🏳️‍⚧️ ":""}${esc(p.name)}</span>${p.pronouns?`<span class="pr">${esc(p.pronouns)}</span>`:""}</div>
+const rowHtml = p => `<div class="item${p.availability==="closed"?" closed":""}${sel===p.id?" sel":""}${newSet.has(p.id)?" new":""}" data-id="${esc(p.id)}">
+    <div><span class="nm">${p.trans_nb?"🏳️‍⚧️ ":""}${esc(p.name)}</span>${p.pronouns?`<span class="pr">${esc(p.pronouns)}</span>`:""}${p.availability==="closed"||p.availability==="waitlist"?`<span class="st st-${p.availability}">${p.availability}</span>`:""}</div>
     <div class="sub">${esc([p.suburb||(p.telehealth_only?"telehealth":""),p.role,p.practice].filter(Boolean).join(" · "))}</div>
     <div class="tags">${p.keywords.map(k=>`<span class="tag">${k}</span>`).join("")}</div></div>`;
 const sentinel = document.createElement("div"); sentinel.style.height = "1px";
@@ -323,6 +333,7 @@ function markerClick(id){
 }
 listEl.addEventListener("click", e=>{ const it = e.target.closest(".item"); if (it) focus(it.dataset.id); });
 document.getElementById("chips").addEventListener("click", e=>{
+  if (e.target.closest("#hcbtn")){ hideClosed = !hideClosed; renderChips(); refilter(); return; }
   if (e.target.closest("#tbtn")){ transOnly = !transOnly; renderChips(); refilter(); return; }
   if (e.target.closest("#mode")){ mode = mode==="and"?"or":"and"; renderChips(); refilter(); return; }
   const c = e.target.closest(".chip"); if(!c) return;

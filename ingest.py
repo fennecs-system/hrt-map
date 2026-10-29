@@ -23,6 +23,14 @@ KEYWORDS = {
 # role tags come only from role/title (descriptions say things like "GP referral required")
 ROLE_RE = {"gp": re.compile(r"\bgp\b|general practi", re.I), "endo": re.compile(r"endocrinolog", re.I),
            "np": re.compile(r"nurse practitioner|\bnp\b|\bmnp\b", re.I), "paeds": re.compile(r"paediatric|pediatric", re.I)}
+# availability: explicit overrides win, else inferred from wording; closed > waitlist > open
+AVAIL_RE = [
+    ("closed", re.compile(r"not (currently )?(taking|accepting|seeing) (any )?new|closed to new|wait ?list (is )?(currently )?closed|"
+                          r"(books|bookings) (are )?(currently )?closed|no new patients|paused new|on (parental|maternity|extended) leave|"
+                          r"(isn't|is not|aren't|are not) (taking|accepting) new", re.I)),
+    ("waitlist", re.compile(r"wait ?list|waiting list|wait(ing)? times?|booking (people|patients) referred", re.I)),
+    ("open", re.compile(r"(now |currently )?(taking|accepting|welcom\w+) new (patients|clients)|new patients welcome", re.I)),
+]
 # a practitioner is only kept if they work in trans / gender-affirming care (excludes menopause-only HRT)
 REQUIRED = "trans"
 KW_RE = {k: re.compile(v, re.I) for k, v in KEYWORDS.items()}
@@ -102,13 +110,13 @@ def locate(r):
 
 
 NICK = {"liz": "elizabeth", "beth": "elizabeth", "lizzie": "elizabeth", "kate": "katherine", "katie": "katherine",
-        "catherine": "katherine", "kathryn": "katherine", "jen": "jennifer", "jenny": "jennifer", "alex": "alexandra",
+        "catherine": "katherine", "cath": "katherine", "cathy": "katherine", "kathryn": "katherine", "jen": "jennifer", "jenny": "jennifer", "alex": "alexandra",
         "alexander": "alexandra", "sam": "samantha", "samuel": "samantha", "chris": "christopher", "christine": "christopher",
         "nick": "nicholas", "matt": "matthew", "mike": "michael", "rob": "robert", "bob": "robert", "dan": "daniel",
         "dave": "david", "tom": "thomas", "ben": "benjamin", "jo": "joanne", "steph": "stephanie", "nic": "nicola",
         "nicki": "nicola", "nikki": "nicola", "andy": "andrew", "tony": "anthony", "pip": "philippa", "mel": "melissa",
         "bec": "rebecca", "becky": "rebecca", "bek": "rebecca", "jess": "jessica", "jodie": "jodie", "will": "william"}
-CREDS = r"\b(dr|mr|ms|mx|mrs|miss|prof|professor|assoc|a/prof|phd|maps|faps|mpsych|dpsych|bsc|ba|ma|msc|clin|psych)\b\.?"
+CREDS = r"\b(dr|mr|ms|mx|mrs|miss|prof|professor|associate|assoc|a/prof|phd|maps|faps|mpsych|dpsych|bsc|ba|ma|msc|clin|psych)\b\.?"
 GENERIC_EMAIL = re.compile(r"^(info|admin|reception|hello|contact|enquiries|enquiry|office|bookings?|referrals?|team|mail|intake|clinic)@", re.I)
 SELF_ID_RE = re.compile(
     r"\b(i am|i'm|as an?|identif(?:y|ies) as|is an?|being an?|myself as|themselves as|they are an?)\s+(?:[\w,]+\s+){0,3}?"
@@ -138,7 +146,7 @@ def name_tokens(n):
 
 def merge(a, b):
     for k, v in b.items():
-        if k in ("sources", "identity_all"):
+        if k in ("sources", "identity_all", "avail_all"):
             continue
         if v and not a.get(k):
             a[k] = v
@@ -148,6 +156,7 @@ def merge(a, b):
             a[k] = v
     a["sources"] = sorted(set(a.get("sources", [])) | set(b.get("sources", [])))
     a["identity_all"] = a.get("identity_all", "") + " " + b.get("identity_all", "")
+    a["avail_all"] = a.get("avail_all", "") + " " + b.get("avail_all", "")
     a["added"] = min(a["added"], b["added"])
     return a
 
@@ -226,6 +235,7 @@ def build():
                 "lat": r.get("lat"), "lng": r.get("lng"),
                 "keywords": kws,
                 "identity_all": str(r.get("identity") or ""),
+                "avail_all": str(r.get("description") or "") + " " + str(r.get("availability_note") or ""),
                 "sources": [s for s in [r.get("source_url")] if s],
                 "agent": f.name.split("-")[0],
                 "added": int(f.stat().st_mtime),
@@ -262,10 +272,31 @@ def build():
         root = find(i)
         people[root] = merge(people[root], r) if root in people else r
     ov = overrides()
+    # "practice:<substring>" overrides apply to everyone whose practice name contains it (personal overrides win)
+    try:
+        pov = [(k.split(":", 1)[1].lower(), v) for k, v in json.loads(OVERRIDES.read_text()).items() if k.startswith("practice:")]
+    except Exception:
+        pov = []
+    hidden = []
+    for key in list(people):
+        p = people[key]
+        # hide prescribers whose only evidence is an AusPATH directory listing (membership != confirmed prescribing)
+        if p["sources"] and all("auspath.org.au" in u for u in p["sources"]):
+            hidden.append(p["name"]); del people[key]
+    (ROOT / "ingest" / "hidden_unverified.txt").write_text(
+        "# hidden: only source is the AusPATH directory (auto-generated)\n" + "\n".join(sorted(hidden)) + "\n")
     for p in people.values():
+        for sub, vals in pov:
+            if sub in (p["practice"] + " " + p["name"]).lower():
+                for k, v in vals.items():
+                    if not k.startswith("_"):
+                        p[k] = v
         for k, v in ov.get("".join(name_tokens(p["name"])), {}).items():
             if not k.startswith("_"):
                 p[k] = v
+        if p.get("availability") not in ("open", "closed", "waitlist", "unknown"):
+            p["availability"] = next((st for st, rx in AVAIL_RE if rx.search(p["avail_all"])), "unknown")
+        p.pop("avail_all", None)
         p["trans_nb"] = bool(TRANS_ID_RE.search(p["identity_all"]) or SELF_ID_RE.search(p["description"]))
         p["identity"] = re.sub(r"\s+", " ", p.pop("identity_all")).strip()
         p["pron_tags"] = pron_tags(p["pronouns"])
@@ -300,7 +331,7 @@ def build():
     return len(out)
 
 
-SLIM_FIELDS = ("id", "name", "role", "pronouns", "pron_tags", "trans_nb", "precision", "suburb", "practice",
+SLIM_FIELDS = ("id", "name", "role", "availability", "pronouns", "pron_tags", "trans_nb", "precision", "suburb", "practice",
                "keywords", "added", "telehealth_only")
 
 

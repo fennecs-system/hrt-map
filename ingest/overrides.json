@@ -36,5 +36,41 @@
     "suburb": "Brunswick East",
     "postcode": "3057",
     "_why": "TG Health Clinic moved (h06); AusPATH still shows old Prahran address"
+  },
+  "Equinox Gender Diverse Health Centre": {
+    "availability": "closed",
+    "_why": "HotDoc Oct 2026: Equinox new-patient waitlist closed (h01/h04)"
+  },
+  "Satu Simpson": {
+    "availability": "closed",
+    "_why": "HotDoc Oct 2026: Equinox new-patient waitlist closed (h01/h04)"
+  },
+  "Nicholas Silberstein": {
+    "availability": "closed",
+    "_why": "HotDoc Oct 2026: Equinox new-patient waitlist closed (h01/h04)"
+  },
+  "Mark Thompson": {
+    "availability": "closed",
+    "_why": "HotDoc Oct 2026: Equinox new-patient waitlist closed (h01/h04)"
+  },
+  "Northside Clinic": {
+    "availability": "closed",
+    "_why": "site says not taking new patients (h03)"
+  },
+  "Chris Phillips": {
+    "availability": "unknown",
+    "_why": "merged Equinox + Harding Street records; Equinox closed but Harding St status unknown"
+  },
+  "practice:Northside": {
+    "availability": "closed",
+    "_why": "Northside Clinic site: not taking new patients (h03)"
+  },
+  "practice:Equinox": {
+    "availability": "closed",
+    "_why": "HotDoc Oct 2026: Equinox new-patient waitlist closed"
+  },
+  "practice:Your Community Health": {
+    "availability": "closed",
+    "_why": "TGD GP service + waitlist closed to new clients since Jan 2026"
   }
 }

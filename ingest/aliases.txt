@@ -1,2 +1,4 @@
 # listed name => canonical name
 Dr Ky Manze - Lygon Street => Dr Ky Manze
+Dr Leah (Spencer) Watts => Dr Spencer Watts
+Dr Chathu Kamburapola => Dr Chathurangi Kamburapola
