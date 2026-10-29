@@ -1,0 +1,18 @@
+[
+{"name": "Dr Adam Brownhill", "pronouns": "", "title": "Dr / General Practitioner (MBBS, MRCGP (UK), FRACGP, FARGP)", "role": "GP",
+ "practice": "TG Health Clinic", "address": "1/1 Brunswick Road", "suburb": "Brunswick East", "postcode": "3057",
+ "phone": "0493 108 844", "email": "", "website": "https://tghealthclinic.com.au",
+ "booking_url": "https://tghealthclinic.com.au/new-patient",
+ "description": "Dr Brownhill is a general practitioner with over 25 years' clinical experience, with a focus on gender-affirming care and long-term patient relationships. TG Health Clinic provides individualised gender-affirming hormone care based on the informed-consent model, with ongoing monitoring and support; GAHT implant insertion is available, and patients already on GAHT can continue or review their treatment. He is a member of AUSPATH, ASIAPATH, and WPATH. In-clinic and telehealth appointments; no referral required.",
+ "specialties": "gender-affirming hormone therapy (GAHT), GAHT implants, general practice", "telehealth": true, "telehealth_only": false,
+ "informed_consent": true, "bulk_billing": false, "min_age": "", "identity": "",
+ "source_url": "https://tghealthclinic.com.au/care-services"},
+{"name": "Equinox (Thorne Harbour Health)", "pronouns": "", "title": "Trans and gender diverse general practice", "role": "Clinic",
+ "practice": "Equinox - Thorne Harbour Health", "address": "200 Hoddle Street", "suburb": "Abbotsford", "postcode": "3067",
+ "phone": "(03) 9416 2889", "email": "equinox.admin@thorneharbour.org", "website": "https://thorneharbour.org/services/trans-and-gender-diverse-clinic",
+ "booking_url": "https://www.hotdoc.com.au/medical-centres/abbotsford-VIC-3067/equinox/doctors",
+ "description": "Equinox is our clinic specialising in trans and gender diverse health. Start, continue or manage gender-affirming hormone therapy with an Equinox GP using the Informed Consent Model; we provide ongoing hormone management, monitoring and support, plus general care, sexual health and referrals for gender-affirming surgery. A separate Specialist Hormone Initiation (endocrinology) service supports adults aged 18+ with a GP referral, in person or by telehealth anywhere in Victoria. GP and endocrinologist appointments are bulk billed for Medicare card holders.",
+ "specialties": "gender-affirming hormone therapy, trans and gender diverse primary care, sexual health, PrEP, endocrinology", "telehealth": true, "telehealth_only": false,
+ "informed_consent": true, "bulk_billing": true, "min_age": "", "identity": "",
+ "source_url": "https://thorneharbour.org/services/trans-and-gender-diverse-clinic"}
+]

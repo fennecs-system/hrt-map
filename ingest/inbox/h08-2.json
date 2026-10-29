@@ -1,0 +1,18 @@
+[
+{"name": "Dr Anojian Koneshamoorthy", "pronouns": "", "title": "Dr / Endocrinologist (AK)", "role": "Endocrinologist",
+ "practice": "Endocrinology Melbourne (Jacaranda Consulting Suites)", "address": "76 Edwin St", "suburb": "Heidelberg Heights", "postcode": "3081",
+ "phone": "03 9459 4415", "email": "admin@endomelb.com.au", "website": "https://www.endocrinologymelb.com.au/clinicians/dr-anojian-koneshamoorthy-ak/",
+ "booking_url": "https://www.endocrinologymelb.com.au/online-booking/",
+ "description": "Private endocrinologist who 'welcomes referrals across all areas of endocrinology, including ... gender-affirming care'; Endocrinology Melbourne lists transgender health / gender-affirming hormone therapy (testosterone and estrogen) as a service. Specialist referral from GP required. Also an endocrinologist in the Austin Health public Gender Clinic (adults 18+, GP referral, shared care).",
+ "specialties": "Gender-affirming care, diabetes, thyroid, men's health, bone and mineral, pituitary, adrenal",
+ "telehealth": true, "telehealth_only": false, "informed_consent": false, "bulk_billing": false, "min_age": "",
+ "identity": "", "source_url": "https://www.endocrinologymelb.com.au/clinicians/dr-anojian-koneshamoorthy-ak/"},
+{"name": "Monash Health Gender Clinic", "pronouns": "", "title": "Public gender service", "role": "Clinic",
+ "practice": "Monash Health Gender Clinic", "address": "Victorian Pride Centre, 3B, 79/81 Fitzroy St", "suburb": "St Kilda", "postcode": "3182",
+ "phone": "(03) 9556 5216", "email": "genderclinic@monashhealth.org", "website": "https://monashhealth.org/services/gender-clinic/",
+ "booking_url": "",
+ "description": "Statewide public specialist service for trans, gender diverse and non-binary Victorians aged 16+. After assessment with clinic clinicians, clients can be referred to Monash Health Endocrinology for gender-affirming hormone therapy (does not take over hormone care started elsewhere). Referral from a GP or specialist via HealthLink eReferral required; no cost for Medicare card holders. Very long waitlist (Oct 2026: booking referrals received June 2024).",
+ "specialties": "Gender assessment, gender-affirming hormone therapy (via Monash Health Endocrinology), surgery referral, voice, laser hair removal",
+ "telehealth": false, "telehealth_only": false, "informed_consent": false, "bulk_billing": true, "min_age": "16+",
+ "identity": "", "source_url": "https://monashhealth.org/services/gender-clinic/questions/"}
+]

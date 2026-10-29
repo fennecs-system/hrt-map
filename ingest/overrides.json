@@ -1,0 +1,40 @@
+{
+  "Darren Russell": {
+    "address": "",
+    "suburb": "",
+    "postcode": "",
+    "telehealth": true,
+    "telehealth_only": true,
+    "_why": "Prism Health telehealth-only; Drysdale is a postal address"
+  },
+  "Michelle Dutton": {
+    "address": "",
+    "suburb": "",
+    "postcode": "",
+    "telehealth": true,
+    "telehealth_only": true,
+    "_why": "Prism Health telehealth-only; Drysdale is a postal address"
+  },
+  "Catherine Lyons": {
+    "address": "",
+    "suburb": "",
+    "postcode": "",
+    "telehealth": true,
+    "telehealth_only": true,
+    "_why": "Prism Health telehealth-only; Drysdale is a postal address"
+  },
+  "Danielle Stefanski": {
+    "address": "",
+    "suburb": "",
+    "postcode": "",
+    "telehealth": true,
+    "telehealth_only": true,
+    "_why": "Prism Health telehealth-only; Drysdale is a postal address"
+  },
+  "Adam Brownhill": {
+    "address": "1/1 Brunswick Rd",
+    "suburb": "Brunswick East",
+    "postcode": "3057",
+    "_why": "TG Health Clinic moved (h06); AusPATH still shows old Prahran address"
+  }
+}

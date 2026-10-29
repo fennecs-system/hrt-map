@@ -1,0 +1,4 @@
+ingest/*.log
+ingest/rejected/
+__pycache__/
+.DS_Store

@@ -1,0 +1,14 @@
+[
+{"name": "Chathurangi Kamburapola", "pronouns": "", "title": "Dr, GP (MBBS DRANZCOG FRACGP)", "role": "GP",
+ "practice": "Inspire Health & Medical (GP special interest clinic)", "address": "Shop 2, 339 Mitcham Road", "suburb": "Mitcham", "postcode": "3132", "phone": "1300 947 477", "email": "",
+ "website": "https://www.inspirehm.com.au/general-practitioner/", "booking_url": "https://www.hotdoc.com.au/medical-centres/mitcham-VIC-3132/inspire-health-and-medical/doctors/dr-chathurangi-kamburapola",
+ "description": "Dr Chathu's GP special interest clinic lists \"Gender affirming care including medical affirmation\" among the issues she addresses, alongside youth mental health, neurodiversity and women's health. She has extended skills training in youth mental health through headspace. Privately billed special interest clinic; patients are advised to keep their regular GP.",
+ "specialties": "gender affirming care, medical affirmation, mental health, neurodiversity, women's health", "telehealth": false, "telehealth_only": false,
+ "informed_consent": false, "bulk_billing": false, "min_age": "", "identity": "", "source_url": "https://www.inspirehm.com.au/general-practitioner/"},
+{"name": "Equality Health Werribee", "pronouns": "", "title": "GP clinic", "role": "Clinic",
+ "practice": "Werribee Medical & Dental Centre", "address": "1/5 Station Place", "suburb": "Werribee", "postcode": "3030", "phone": "(03) 8734 0333", "email": "",
+ "website": "https://www.equalityhealth.com.au/location/werribee-medical-dental-centre/", "booking_url": "",
+ "description": "Equality Health Werribee, part of the Werribee Medical & Dental Centre, offers LGBTIQA+ health services including PrEP, sexual health consultations and Gender Affirming Therapy; Equality Health provides adult gender-affirming hormone therapy consultations using an informed-consent approach (18+). Since December 2024 the centre has partnered with the Victorian Sexual Health Network to provide sexual health and transgender health care services. Bulk billing available for eligible patients.",
+ "specialties": "gender affirming hormone therapy, transgender health, LGBTIQA+ health, PrEP, sexual health", "telehealth": true, "telehealth_only": false,
+ "informed_consent": true, "bulk_billing": false, "min_age": "18+", "identity": "", "source_url": "https://www.equalityhealth.com.au/location/werribee-medical-dental-centre/"}
+]

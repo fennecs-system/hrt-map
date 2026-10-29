@@ -1,0 +1,20 @@
+[
+{"name": "Brandon Yeo", "pronouns": "", "title": "Dr, GP", "role": "GP",
+ "practice": "Equality Health Frankston (Young Street Medical & Dental Centre)", "address": "89-97 Young Street", "suburb": "Frankston", "postcode": "3199", "phone": "(03) 9771 8111", "email": "",
+ "website": "https://www.equalityhealth.com.au/location/young-street-medical-dental-centre/", "booking_url": "https://www.hotdoc.com.au/medical-centres/frankston-VIC-3199/young-street-medical-dental-centre-frankston/doctors/dr-brandon-yeo",
+ "description": "The Equality Health GP at Young Street Medical & Dental Centre, with strong interests in men's health and LGBTQI+ health. Equality Health Frankston offers LGBTIQA+ health services including PrEP, sexual health and Gender Affirming Therapy; Equality Health provides adult gender-affirming hormone therapy consultations using an informed-consent approach (18+). The centre advertises 100% bulk billing GP consults for all patients with a valid Medicare card.",
+ "specialties": "gender affirming hormone therapy, LGBTQI+ health, men's health, PrEP, sexual health", "telehealth": false, "telehealth_only": false,
+ "informed_consent": true, "bulk_billing": true, "min_age": "18+", "identity": "", "source_url": "https://www.equalityhealth.com.au/location/young-street-medical-dental-centre/"},
+{"name": "Equality Health Werribee", "pronouns": "", "title": "GP clinic", "role": "Clinic",
+ "practice": "Werribee Medical & Dental Centre", "address": "1/5 Station Place", "suburb": "Werribee", "postcode": "3030", "phone": "(03) 8734 0333", "email": "",
+ "website": "https://www.equalityhealth.com.au/location/werribee-medical-dental-centre/", "booking_url": "",
+ "description": "Equality Health Werribee, part of the Werribee Medical & Dental Centre, offers LGBTIQA+ health services from LGBTIQA+ friendly GPs, including PrEP, sexual health consultations and Gender Affirming Therapy. Equality Health provides adult gender-affirming hormone therapy consultations using an informed-consent approach (18+). Bulk billing available for eligible patients.",
+ "specialties": "gender affirming hormone therapy, LGBTIQA+ health, PrEP, sexual health", "telehealth": false, "telehealth_only": false,
+ "informed_consent": true, "bulk_billing": false, "min_age": "18+", "identity": "", "source_url": "https://www.equalityhealth.com.au/service/gender-affirming-hormone-therapy/"},
+{"name": "Equality Health Moonee Ponds", "pronouns": "", "title": "GP clinic", "role": "Clinic",
+ "practice": "Moonee Ponds Medical & Dental Centre", "address": "34/46 Holmes Road", "suburb": "Moonee Ponds", "postcode": "3039", "phone": "(03) 9945 7777", "email": "",
+ "website": "https://www.equalityhealth.com.au/location/moonee-ponds-medical-dental-centre/", "booking_url": "",
+ "description": "Equality Health Moonee Ponds offers LGBTIQA+ health services including PrEP, sexual health consultations and Gender Affirming Therapy; Equality Health provides adult gender-affirming hormone therapy consultations using an informed-consent approach (18+). Listed GPs: Dr Christian Wiseman, Dr Katie Stout (special interest in LGBTIQA+ health, HIV medicine and sexual health) and Dr Neil Read.",
+ "specialties": "gender affirming hormone therapy, LGBTIQA+ health, HIV, PrEP, sexual health", "telehealth": false, "telehealth_only": false,
+ "informed_consent": true, "bulk_billing": false, "min_age": "18+", "identity": "", "source_url": "https://www.equalityhealth.com.au/service/gender-affirming-hormone-therapy/"}
+]

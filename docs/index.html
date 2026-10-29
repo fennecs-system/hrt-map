@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>hrt.map // melbourne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{
+  --bg:#0b0b0d; --panel:#121216; --panel2:#18181d; --line:#26262d; --text:#d6d6db;
+  --dim:#7c7c87; --lilac:#c4b5fd; --lilac2:#a78bfa; --lilacbg:#1d1a2b;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font:15px/1.5 "JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+#app{display:grid;grid-template-columns:440px 1fr;height:100vh}
+aside{display:flex;flex-direction:column;border-right:1px solid var(--line);background:var(--panel);min-height:0}
+header{padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+h1{margin:0;font-size:17px;letter-spacing:.04em;color:var(--lilac)}
+h1 span{color:var(--dim);font-weight:400}
+.stats{margin-top:6px;color:var(--dim);font-size:12.5px;display:flex;gap:12px;align-items:center}
+.live{display:inline-flex;align-items:center;gap:6px}
+.live i{width:7px;height:7px;border-radius:50%;background:var(--lilac2);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.25}}
+input{width:100%;margin-top:10px;padding:8px 10px;background:var(--bg);color:var(--text);
+  border:1px solid var(--line);border-radius:4px;font:inherit;outline:none}
+input:focus{border-color:var(--lilac2)}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.chip{cursor:pointer;padding:3px 8px;border:1px solid var(--line);border-radius:3px;color:var(--dim);font-size:12.5px;user-select:none}
+.mode{cursor:pointer;width:26px;height:26px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--lilac2);border-radius:3px;color:var(--lilac);background:var(--lilacbg);font:700 13px "JetBrains Mono",monospace;user-select:none}
+.plabel{color:var(--dim);font-size:12px;align-self:center;margin-right:2px}
+.mode:hover{background:#2a2440}
+.tbtn{cursor:pointer;height:26px;padding:0 7px;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);border-radius:3px;color:var(--dim);font-size:12.5px;user-select:none;flex:none}
+.tbtn span{font-size:15px;line-height:1;filter:grayscale(.7) opacity(.7)}
+.tbtn.on{border-color:var(--lilac2);background:var(--lilacbg);color:var(--lilac)}
+.tbtn.on span{filter:none}
+.chip.on{color:var(--lilac);border-color:var(--lilac2);background:var(--lilacbg)}
+.chip b{font-weight:400;opacity:.6;margin-left:3px}
+#list{overflow-y:auto;flex:1;min-height:0;overscroll-behavior:contain}
+#list::-webkit-scrollbar{width:8px}#list::-webkit-scrollbar-thumb{background:var(--line)}
+.item{padding:10px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+.item:hover,.item.sel{background:var(--panel2)}
+.item.sel{box-shadow:inset 2px 0 var(--lilac2)}
+.item.new{animation:flash 2.5s ease-out}
+@keyframes flash{from{background:#3a2f63}to{background:transparent}}
+.nm{color:#f0f0f3;font-weight:600}
+.pr{color:var(--lilac);font-size:12.5px;margin-left:6px}
+.sub{color:var(--dim);font-size:12.5px;margin-top:2px}
+.tags{margin-top:5px;display:flex;flex-wrap:wrap;gap:4px}
+.tag{font-size:11.5px;padding:0 5px;border-radius:2px;background:var(--lilacbg);color:var(--lilac)}
+#map{height:100%;background:#0e0e11}
+/* fallback only: browsers without OffscreenCanvas get the CSS filter; others get pre-darkened tiles */
+.css-dark .leaflet-tile-pane{filter:invert(1) hue-rotate(200deg) saturate(.35) brightness(.85) contrast(.9)}
+.empty{padding:24px 16px;color:var(--dim)}
+/* markers */
+.pin{width:12px;height:12px;border-radius:50%;background:var(--lilac2);border:2px solid #0b0b0d;box-shadow:0 0 0 1px var(--lilac2),0 0 10px #a78bfa88}
+.pin.approx{background:transparent;border:2px dashed var(--lilac2)}
+.tpin{font-size:20px;line-height:20px;filter:drop-shadow(0 0 4px #000)}
+.drop{animation:drop .6s cubic-bezier(.3,1.6,.6,1)}
+@keyframes drop{from{transform:translateY(-30px) scale(.3);opacity:0}}
+/* popup */
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:4px;box-shadow:0 6px 30px #000a}
+.leaflet-popup-content{font:13.5px/1.5 "JetBrains Mono",monospace;margin:12px 14px;width:300px!important}
+.leaflet-container a{color:var(--lilac)}
+.leaflet-popup-close-button{color:var(--dim)!important}
+.pp h3{margin:0;font-size:16px;color:#f0f0f3}
+.pp .k{color:var(--dim);display:inline-block;width:70px}
+.pp .row{margin-top:3px;word-break:break-word}
+.pp .desc{margin-top:8px;color:#a9a9b3;font-size:12.5px;max-height:120px;overflow:auto;border-top:1px solid var(--line);padding-top:6px}
+.btn{display:inline-block;margin-top:9px;padding:5px 10px;border:1px solid var(--lilac2);border-radius:3px;color:var(--lilac)!important;text-decoration:none;background:var(--lilacbg)}
+.leaflet-control-zoom a{background:var(--panel)!important;color:var(--lilac)!important;border-color:var(--line)!important}
+.leaflet-control-attribution{background:#0b0b0dcc!important;color:var(--dim)!important}
+aside,#map{min-width:0}
+@media (max-width:760px){
+  #app{grid-template-columns:minmax(0,1fr);grid-template-rows:42vh 58vh;height:100dvh}
+  aside{order:2}#map{order:1}
+  header{padding:10px 12px 8px}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-left:-12px;margin-right:-12px;padding:0 12px}
+  .chips::-webkit-scrollbar{display:none}
+  .chip,.mode,.plabel{flex:none}
+  .item{padding:9px 12px}
+  .leaflet-popup-content{width:min(300px,70vw)!important}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <aside>
+    <header>
+      <h1>hrt.map <span>// melbourne</span></h1>
+      <div class="stats"><span class="live"><i></i><span id="status">connecting…</span></span><span id="count">0</span></div>
+      <input id="q" placeholder="filter: name, suburb, clinic, keyword…" autocomplete="off">
+      <div class="chips" id="chips"></div>
+      <div class="chips" id="pchips"></div>
+    </header>
+    <div id="list"><div class="empty">waiting for agents to report in…</div></div>
+  </aside>
+  <div id="map"></div>
+</div>
+<script>
+const PRON = ["she/her","he/him","they/them","other"];
+const KW = ["hrt","informed-consent","gp","endo","np","paeds","youth","bulk-bill","lgbt","sexual-health"];
+const LOCAL = /^(localhost|127\.|192\.168\.|10\.)/.test(location.hostname);
+const POLL_MS = LOCAL ? 3000 : 60000;   // live while agents run locally; lazy on Pages
+const PAGE = 80;                         // list rows rendered per batch
+
+const map = L.map("map",{zoomControl:true, preferCanvas:true}).setView([-37.8136,144.9631],11);
+const TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+const TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+// Dark tiles: each tile is recoloured once in a worker with the same maths as the CSS filter
+// invert(1) hue-rotate(200deg) saturate(.35) brightness(.85) contrast(.9), so the compositor only
+// moves plain bitmaps while panning/zooming (a live CSS filter over the pane re-rasterises on mobile).
+const TILE_WORKER = `
+const rad = 200 * Math.PI / 180, a = Math.cos(rad), b = Math.sin(rad);
+const H = [.213+a*.787-b*.213, .715-a*.715-b*.715, .072-a*.072+b*.928,
+           .213-a*.213+b*.143, .715+a*.285+b*.140, .072-a*.072-b*.283,
+           .213-a*.213-b*.787, .715-a*.715+b*.715, .072+a*.928+b*.072];
+const s = .35, k = .85 * .9;  // saturate, then brightness*contrast slope
+const S = [.213+.787*s, .715-.715*s, .072-.072*s, .213-.213*s, .715+.285*s, .072-.072*s, .213-.213*s, .715-.715*s, .072+.928*s].map(v => v * k);
+const OFF = 255 * .5 * (1 - .9);
+const cl = v => v < 0 ? 0 : v > 255 ? 255 : v;
+function recolour(d){
+  for (let i = 0; i < d.length; i += 4){
+    const r0 = 255 - d[i], g0 = 255 - d[i+1], b0 = 255 - d[i+2];
+    const r = cl(H[0]*r0 + H[1]*g0 + H[2]*b0), g = cl(H[3]*r0 + H[4]*g0 + H[5]*b0), bb = cl(H[6]*r0 + H[7]*g0 + H[8]*b0);
+    d[i] = S[0]*r + S[1]*g + S[2]*bb + OFF; d[i+1] = S[3]*r + S[4]*g + S[5]*bb + OFF; d[i+2] = S[6]*r + S[7]*g + S[8]*bb + OFF;
+  }
+}
+const ctrl = new Map();
+onmessage = async e => {
+  const { id, url, ref, cancel } = e.data;
+  if (cancel){ ctrl.get(cancel)?.abort(); return; }
+  const ac = new AbortController(); ctrl.set(id, ac);
+  try {
+    const res = await fetch(url, { signal: ac.signal, mode: "cors", credentials: "omit", referrer: ref, referrerPolicy: "strict-origin-when-cross-origin" });
+    const bmp = await createImageBitmap(await res.blob());
+    const oc = new OffscreenCanvas(bmp.width, bmp.height), x = oc.getContext("2d", { willReadFrequently: true });
+    x.drawImage(bmp, 0, 0); bmp.close();
+    const im = x.getImageData(0, 0, oc.width, oc.height); recolour(im.data); x.putImageData(im, 0, 0);
+    const out = oc.transferToImageBitmap(); postMessage({ id, bmp: out }, [out]);
+  } catch (err) { postMessage({ id, err: String(err) }); }
+  finally { ctrl.delete(id); }
+};`;
+const canWorkerTiles = (() => { try { return typeof Worker !== "undefined" && !!new OffscreenCanvas(1,1).getContext("2d") && "createImageBitmap" in window; } catch { return false; } })();
+if (canWorkerTiles){
+  const url = URL.createObjectURL(new Blob([TILE_WORKER], {type:"text/javascript"}));
+  const pool = Array.from({length: Math.min(4, Math.max(2, (navigator.hardwareConcurrency||4) - 1))}, () => new Worker(url));
+  const jobs = new Map(); let seq = 0;
+  pool.forEach(w => w.onmessage = e => {
+    const { id, bmp, err } = e.data, job = jobs.get(id); if (!job) { bmp && bmp.close(); return; }
+    jobs.delete(id);
+    if (bmp) job.tile.getContext("bitmaprenderer").transferFromImageBitmap(bmp);
+    job.done(err ? new Error(err) : null, job.tile);
+  });
+  const DarkTiles = L.GridLayer.extend({
+    createTile(c, done){
+      const tile = document.createElement("canvas"); tile.width = tile.height = 256;
+      const id = ++seq; tile._job = id; jobs.set(id, { tile, done });
+      pool[id % pool.length].postMessage({ id, ref: location.href, url: L.Util.template(TILE_URL, { z: c.z, x: c.x, y: c.y }) });
+      return tile;
+    }
+  });
+  const layer = new DarkTiles({ attribution: TILE_ATTR, maxZoom: 19, updateWhenZooming: false, keepBuffer: 3 }).addTo(map);
+  layer.on("tileunload", e => { const id = e.tile._job; if (jobs.delete(id)) pool[id % pool.length].postMessage({ cancel: id }); });
+} else {
+  map.getContainer().classList.add("css-dark");
+  L.tileLayer(TILE_URL, { attribution: TILE_ATTR, maxZoom: 19 }).addTo(map);
+}
+
+const people = new Map(), markers = new Map();
+const active = new Set(), pactive = new Set(); let transOnly = false, mode = "or", q = "", sel = null, first = true;
+let details = null, detailsP = null;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const safeUrl = u => /^https?:\/\//i.test(u||"") ? u : "";
+
+function loadDetails(){
+  if (!detailsP) detailsP = fetch("details.json?t="+lastUpdated, {cache:"no-store"}).then(r=>r.json())
+    .then(d=>{ details = d.people; for (const [id,m] of markers) if (m.isPopupOpen()) m.setPopupContent(popup(id)); return details; })
+    .catch(()=>{ detailsP = null; });
+  return detailsP;
+}
+
+// Pins: each dot style (glow halo + dot + ring) is pre-rendered once into a small sprite at device
+// pixel ratio, then stamped with drawImage — no per-pin path/gradient work on redraw.
+const GLOW = 2.8, sprites = new Map();
+function sprite(o, r){
+  const dpr = window.devicePixelRatio || 1, key = `${o.color}|${o.fillOpacity}|${o.weight}|${o.dashArray}|${r}|${dpr}`;
+  let sp = sprites.get(key); if (sp) return sp;
+  const R = r * GLOW, size = Math.ceil(R * 2 + o.weight + 2), c = document.createElement("canvas");
+  c.width = c.height = Math.ceil(size * dpr);
+  const x = c.getContext("2d"), m = size / 2; x.scale(dpr, dpr);
+  const g = x.createRadialGradient(m, m, r * .6, m, m, R);
+  g.addColorStop(0, "rgba(167,139,250,.5)"); g.addColorStop(1, "rgba(167,139,250,0)");
+  x.fillStyle = g; x.beginPath(); x.arc(m, m, R, 0, Math.PI * 2); x.fill();
+  x.beginPath(); x.arc(m, m, r, 0, Math.PI * 2);
+  if (o.fillOpacity){ x.globalAlpha = o.fillOpacity; x.fillStyle = o.fillColor; x.fill(); x.globalAlpha = 1; }
+  x.lineWidth = o.weight; x.strokeStyle = o.color; x.lineCap = x.lineJoin = "round";
+  if (o.dashArray) x.setLineDash(String(o.dashArray).split(/[ ,]+/).map(Number));
+  x.stroke();
+  sprites.set(key, sp = { c, size }); return sp;
+}
+const GlowCanvas = L.Canvas.extend({
+  _updateCircle(layer){
+    if (!this._drawing || layer._empty()) return;
+    const p = layer._point, sp = sprite(layer.options, Math.max(Math.round(layer._radius * 2) / 2, 1));
+    this._ctx.drawImage(sp.c, p.x - sp.size / 2, p.y - sp.size / 2, sp.size, sp.size);
+  }
+});
+const GlowDot = L.CircleMarker.extend({
+  _updateBounds(){ // include the halo so partial redraws don't leave smears
+    const R = this._radius * GLOW + this.options.weight + this._clickTolerance(), p = this._point;
+    this._pxBounds = new L.Bounds(p.subtract([R, R]), p.add([R, R]));
+  }
+});
+const canvas = new GlowCanvas({padding:.3});
+const LILAC = "#a78bfa";
+const dotStyle = p => ({renderer:canvas, radius:5, weight:p.precision==="approx"?1.5:2, color:p.precision==="approx"?LILAC:"#0b0b0d",
+  fillColor:LILAC, fillOpacity:p.precision==="approx"?0:1, dashArray:p.precision==="approx"?"2 2":null});
+function makeMarker(p, fresh){
+  let m;
+  if (p.trans_nb){
+    const icon = L.divIcon({className:"", html:`<div class="tpin${fresh?" drop":""}">🏳️‍⚧️</div>`, iconSize:[20,20], iconAnchor:[10,10]});
+    m = L.marker([p.lat,p.lng], {icon, zIndexOffset:500});
+  } else {
+    m = new GlowDot([p.lat,p.lng], dotStyle(p));
+    if (fresh){ let r = 14; m.setRadius(r);
+      const t = setInterval(()=>{ r -= 1.5; if (r <= 5){ r = 5; clearInterval(t); } m.setRadius(r); }, 40); }
+  }
+  // popup HTML is built only when opened
+  m.bindPopup(()=>popup(p.id), {maxWidth:330, autoPanPadding:[20,20]});
+  m.on("popupopen", ()=>{ if (!details) loadDetails(); });
+  m.on("click", ()=>markerClick(p.id));
+  return m;
+}
+function popup(id){
+  const s = people.get(id), p = (details && details[id]) || s;
+  const web = safeUrl(p.website), book = safeUrl(p.booking_url) || web;
+  const loc = [p.address, p.suburb].filter(Boolean).join(", ") || (p.telehealth_only ? "telehealth only" : "");
+  return `<div class="pp"><h3>${p.trans_nb?"🏳️‍⚧️ ":""}${esc(p.name)}</h3>
+    ${p.pronouns?`<div class="row" style="color:var(--lilac)">${esc(p.pronouns)}</div>`:""}
+    ${p.title||p.role||p.practice?`<div class="row" style="color:var(--dim)">${esc([p.title||p.role,p.practice].filter(Boolean).join(" @ "))}</div>`:""}
+    ${p.informed_consent||p.bulk_billing||p.min_age?`<div class="row"><span class="k">model</span>${esc([p.informed_consent&&"informed consent",p.bulk_billing&&"bulk bills",p.min_age&&("ages "+p.min_age)].filter(Boolean).join(" · "))}</div>`:""}
+    ${loc?`<div class="row"><span class="k">where</span>${esc(loc)}${p.telehealth&&!p.telehealth_only?" (+telehealth)":""}</div>`:""}
+    ${p.phone?`<div class="row"><span class="k">phone</span><a href="tel:${esc(p.phone.replace(/\s/g,""))}">${esc(p.phone)}</a></div>`:""}
+    ${p.email?`<div class="row"><span class="k">email</span><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></div>`:""}
+    ${web?`<div class="row"><span class="k">web</span><a href="${esc(web)}" target="_blank" rel="noopener">${esc(web.replace(/^https?:\/\/(www\.)?/,"").slice(0,40))}</a></div>`:""}
+    <div class="tags">${p.keywords.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
+    ${!details?`<div class="desc">loading details…</div>`:p.description?`<div class="desc">${esc(p.description)}</div>`:""}
+    ${book?`<a class="btn" href="${esc(book)}" target="_blank" rel="noopener">→ ${p.booking_url?"book":"website"}</a>`:""}
+    ${p.sources?`<div class="row" style="color:var(--dim);font-size:10px;margin-top:8px">src: ${p.sources.map((s,i)=>`<a href="${esc(safeUrl(s))}" target="_blank" rel="noopener">[${i+1}]</a>`).join(" ")} · loc: ${esc(p.precision)}</div>`:""}</div>`;
+}
+const isTrans = p => p.trans_nb;
+function matches(p){
+  if (transOnly && !isTrans(p)) return false;
+  if (pactive.size && !(p.pron_tags||[]).some(t=>pactive.has(t))) return false;
+  if (active.size){
+    const has = k => p.keywords.includes(k) || (k==="trans" && p.trans_nb);
+    const ks = [...active];
+    if (mode==="and" ? !ks.every(has) : !ks.some(has)) return false;
+  }
+  if (!q) return true;
+  const d = details && details[p.id];
+  return [p.name,p.suburb,p.practice,p.pronouns,p.keywords.join(" "), d ? d.description+" "+d.specialties : ""].join(" ").toLowerCase().includes(q);
+}
+function renderChips(){
+  const counts = Object.fromEntries(KW.map(k=>[k,0]));
+  people.forEach(p=>p.keywords.forEach(k=>counts[k]!=null&&counts[k]++));
+  document.getElementById("chips").innerHTML = `<span class="mode" id="mode" title="${mode==="and"?"match ALL selected (and) — click for any":"match ANY selected (or) — click for all"}">${mode==="and"?"∧":"∨"}</span>` + `<span class="tbtn${transOnly?" on":""}" id="tbtn" title="only prescribers who publicly identify as trans / non-binary"><span>🏳️‍⚧️</span>${[...people.values()].filter(isTrans).length}</span>` + KW.map(k=>`<span class="chip${active.has(k)?" on":""}" data-k="${k}">${k}<b>${counts[k]}</b></span>`).join("");
+}
+function renderPChips(){
+  const counts = Object.fromEntries(PRON.map(k=>[k,0]));
+  people.forEach(p=>(p.pron_tags||[]).forEach(t=>counts[t]!=null&&counts[t]++));
+  document.getElementById("pchips").innerHTML = `<span class="plabel">pronouns</span>` + PRON.map(k=>`<span class="chip${pactive.has(k)?" on":""}" data-p="${k}">${k}<b>${counts[k]}</b></span>`).join("");
+}
+
+// list: render in batches of PAGE as the user scrolls
+const listEl = document.getElementById("list");
+let shown = [], rendered = 0, lastListKey = "", newSet = new Set();
+const rowHtml = p => `<div class="item${sel===p.id?" sel":""}${newSet.has(p.id)?" new":""}" data-id="${esc(p.id)}">
+    <div><span class="nm">${p.trans_nb?"🏳️‍⚧️ ":""}${esc(p.name)}</span>${p.pronouns?`<span class="pr">${esc(p.pronouns)}</span>`:""}</div>
+    <div class="sub">${esc([p.suburb||(p.telehealth_only?"telehealth":""),p.role,p.practice].filter(Boolean).join(" · "))}</div>
+    <div class="tags">${p.keywords.map(k=>`<span class="tag">${k}</span>`).join("")}</div></div>`;
+const sentinel = document.createElement("div"); sentinel.style.height = "1px";
+function appendRows(){
+  if (rendered >= shown.length) return;
+  const next = shown.slice(rendered, rendered + PAGE); rendered += next.length;
+  sentinel.insertAdjacentHTML("beforebegin", next.map(rowHtml).join(""));
+}
+new IntersectionObserver(es=>{ if (es.some(e=>e.isIntersecting)) appendRows(); }, {root:listEl, rootMargin:"600px"}).observe(sentinel);
+
+let filterQueued = false;
+function renderList(newIds, force){
+  shown = [...people.values()].filter(matches).sort((a,b)=>(transOnly ? (b.trans_nb?1:0)-(a.trans_nb?1:0) : 0) || b.added-a.added || a.name.localeCompare(b.name));
+  const vis = new Set(shown.map(p=>p.id));
+  markers.forEach((m,id)=>{ const v = vis.has(id), on = map.hasLayer(m); if (v && !on) m.addTo(map); else if (!v && on) m.remove(); });
+  document.getElementById("count").textContent = `${shown.length}/${people.size} shown`;
+  const key = shown.map(p=>p.id).join("|");
+  if (!force && !newIds.size && key === lastListKey) return;
+  lastListKey = key; newSet = newIds;
+  const top = listEl.scrollTop;
+  if (!shown.length){ listEl.innerHTML = `<div class="empty">${people.size?"no matches":"waiting for agents to report in…"}</div>`; return; }
+  listEl.innerHTML = ""; listEl.appendChild(sentinel); rendered = 0;
+  while (rendered < shown.length && (rendered < PAGE || rendered < Math.ceil((top + listEl.clientHeight) / 60))) appendRows();
+  listEl.scrollTop = top;
+}
+const refilter = () => { if (filterQueued) return; filterQueued = true; requestAnimationFrame(()=>{ filterQueued = false; renderList(new Set(), true); }); };
+
+function focus(id){
+  const p = people.get(id), m = markers.get(id); if (!p||!m) return;
+  sel = id; map.flyTo([p.lat,p.lng], Math.max(map.getZoom(),14), {duration:.6});
+  map.once("moveend", ()=>m.openPopup());
+  listEl.querySelectorAll(".item.sel").forEach(e=>e.classList.remove("sel"));
+  listEl.querySelector(`.item[data-id="${CSS.escape(id)}"]`)?.classList.add("sel");
+}
+function markerClick(id){
+  sel = id; listEl.querySelectorAll(".item.sel").forEach(e=>e.classList.remove("sel"));
+  const el = listEl.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
+  if (el){ el.classList.add("sel"); el.scrollIntoView({block:"nearest"}); }
+}
+listEl.addEventListener("click", e=>{ const it = e.target.closest(".item"); if (it) focus(it.dataset.id); });
+document.getElementById("chips").addEventListener("click", e=>{
+  if (e.target.closest("#tbtn")){ transOnly = !transOnly; renderChips(); refilter(); return; }
+  if (e.target.closest("#mode")){ mode = mode==="and"?"or":"and"; renderChips(); refilter(); return; }
+  const c = e.target.closest(".chip"); if(!c) return;
+  active.has(c.dataset.k)?active.delete(c.dataset.k):active.add(c.dataset.k); renderChips(); refilter(); });
+document.getElementById("pchips").addEventListener("click", e=>{ const c = e.target.closest(".chip"); if(!c) return;
+  pactive.has(c.dataset.p)?pactive.delete(c.dataset.p):pactive.add(c.dataset.p); renderPChips(); refilter(); });
+let qTimer;
+document.getElementById("q").addEventListener("input", e=>{
+  clearTimeout(qTimer);
+  qTimer = setTimeout(()=>{ q = e.target.value.trim().toLowerCase(); if (q && !details) loadDetails().then(refilter); refilter(); }, 150);
+});
+
+let lastUpdated = 0, polling = false;
+async function poll(){
+  if (polling || document.hidden) return; polling = true;
+  try{
+    const meta = await (await fetch("meta.json?t="+Date.now(), {cache:"no-store"})).json();
+    document.getElementById("status").textContent = `${LOCAL?"live":"updated"} · ${meta.inbox_files} reports · ${new Date(meta.updated*1000).toLocaleTimeString()}`;
+    if (meta.updated === lastUpdated) return;
+    const d = await (await fetch("data.json?t="+meta.updated, {cache:"no-store"})).json();
+    lastUpdated = d.updated;
+    if (details){ detailsP = null; details = null; loadDetails(); }  // refresh stale details
+    const newIds = new Set(); let changed = false;
+    for (const p of d.people){
+      const old = people.get(p.id); people.set(p.id, p);
+      if (!old){
+        if (!first) newIds.add(p.id);
+        markers.set(p.id, makeMarker(p, !first));
+      } else if (old.v !== p.v){
+        let m = markers.get(p.id);
+        if (!!old.trans_nb !== !!p.trans_nb){ const on = map.hasLayer(m); m.remove(); m = makeMarker(p,false); markers.set(p.id, m); if (on) m.addTo(map); }
+        else { m.setLatLng([p.lat,p.lng]); if (m.setStyle) m.setStyle(dotStyle(p)); }
+        changed = true;
+      }
+    }
+    first = false; renderChips(); renderPChips(); renderList(newIds, changed);
+  }catch(e){ document.getElementById("status").textContent = "waiting for data…"; }
+  finally{ polling = false; }
+}
+renderChips(); renderPChips(); poll(); setInterval(poll, POLL_MS);
+document.addEventListener("visibilitychange", ()=>{ if (!document.hidden) poll(); });
+</script>
+</body>
+</html>
